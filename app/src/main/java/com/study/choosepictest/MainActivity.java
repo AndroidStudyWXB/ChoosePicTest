@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -20,8 +21,10 @@ public class MainActivity extends Activity {
 
     public static final int TAKE_PHOTO = 1;
     public static final int CROP_PHOTO = 2;
+    public static final int CHOOSE_PHOTO = 3;
 
     private Button takePhoto;
+    private Button choosePhoto;
     private ImageView picture;
     private Uri imageUri;
 
@@ -30,9 +33,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        takePhoto = (Button) findViewById(R.id.take_photo);
         picture = (ImageView)findViewById(R.id.picture);
 
+        takePhoto = (Button) findViewById(R.id.take_photo);
         takePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,6 +57,18 @@ public class MainActivity extends Activity {
 
                 //启动相机程序
                 startActivityForResult(intent, TAKE_PHOTO);
+            }
+        });
+
+        choosePhoto = (Button) findViewById(R.id.choose_from_album);
+        choosePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent("android.intent.action.GET_CONTENT");
+                intent.setType("image/*");
+
+                //打开相册
+                startActivityForResult(intent, CHOOSE_PHOTO);
             }
         });
     }
@@ -81,8 +96,24 @@ public class MainActivity extends Activity {
                     }
                 }
                 break;
+            case CHOOSE_PHOTO:
+                if(resultCode == RESULT_OK) {
+                    //判断API
+                    if(Build.VERSION.SDK_INT >= 19) {
+                        handleImageOnKitKat(data);
+                    } else {
+                        handleImageBeforeKitKat(data);
+                    }
+                }
+                break;
             default:
                 break;
         }
+    }
+
+    @TargetAPI(19)
+    private void handleImageOnKitKat(Intent data) {
+        String imagePath = null;
+        Uri uri = data.getData();
     }
 }
